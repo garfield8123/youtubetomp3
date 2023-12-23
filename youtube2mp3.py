@@ -83,6 +83,7 @@ def addartisttomusic(download_path, video):
     title_parts = video.split('-')
 
     if len(title_parts) >= 2:
+        # Grabs the respectful artist_name and song_title 
         artist_name = title_parts[0].strip()
         track_title = title_parts[1].strip()
         print(f"Artist Name: {artist_name}")
