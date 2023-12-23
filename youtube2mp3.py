@@ -20,15 +20,15 @@ def playlist2mp3(playlist_url, Download_location):
             'format': 'm4a/bestaudio/best',
             # ℹ️ See help(yt_dlp.postprocessor) for a list of available Postprocessors and their arguments
             'postprocessors': [],
-            'outtmpl': download_path + '%(title)s.%(ext)s'
+            'outtmpl': download_path + '%(title)s.%(ext)s',
+            'restrictfilenames':True
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             error_code = ydl.download(URLS)
             info = ydl.extract_info(URLS[0], download=False)
-        #video_title, video_ext = get_video_info(URLS)
-        print(info.get("title"))
-        addartisttomusic(download_path, info.get("title"))
+            filename = ydl.prepare_filename(info)
+        addartisttomusic(download_path, filename)
         sleep(10)
 
 def youtubevideo2mp3(youtube_url, Download_location):
@@ -40,13 +40,15 @@ def youtubevideo2mp3(youtube_url, Download_location):
         'format': 'm4a/bestaudio/best',
         # ℹ️ See help(yt_dlp.postprocessor) for a list of available Postprocessors and their arguments
         'postprocessors': [],
-        'outtmpl': download_path + '%(title)s.%(ext)s'
+        'outtmpl': download_path + '%(title)s.%(ext)s',
+        'restrictfilenames':True
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         error_code = ydl.download(URLS)
         info = ydl.extract_info(URLS[0], download=False)
-    addartisttomusic(download_path, info.get("title"))
+        filename = ydl.prepare_filename(info)
+    addartisttomusic(download_path, filename)
 
 def youtubeChannel2mp3(Channel_id, Download_location):
     videos = scrapetube.get_channel(Channel_id)
@@ -61,13 +63,15 @@ def youtubeChannel2mp3(Channel_id, Download_location):
             'format': 'm4a/bestaudio/best',
             # ℹ️ See help(yt_dlp.postprocessor) for a list of available Postprocessors and their arguments
             'postprocessors': [],
-            'outtmpl': download_path + '%(title)s.%(ext)s'
+            'outtmpl': download_path + '%(title)s.%(ext)s',
+            'restrictfilenames':True
         }
         #video_title, video_ext = get_video_info(video['videoId'])
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             error_code = ydl.download(URLS)
             info = ydl.extract_info(URLS[0], download=False)
-        addartisttomusic(download_path, info.get("title"))
+            filename = ydl.prepare_filename(info)
+        addartisttomusic(download_path, filename)
         sleep(10)
 
 def get_video_info(URLS):
@@ -77,18 +81,19 @@ def get_video_info(URLS):
 
 def addartisttomusic(download_path, video):
     from mutagen.mp4 import MP4, MP4Cover
-    file_path = download_path + f"{video}.m4a"  # Path to the downloaded file
+    file_path = download_path + f"{video}"  # Path to the downloaded file
     audio = MP4(file_path)
     # Splitting the title based on the hyphen to get artist and song title
     title_parts = video.split('-')
 
     if len(title_parts) >= 2:
-        # Grabs the respectful artist_name and song_title 
         artist_name = title_parts[0].strip()
         track_title = title_parts[1].strip()
         print(f"Artist Name: {artist_name}")
         print(f"Track Title: {track_title}")
     else:
+        artist_name = ""
+        track_title = video
         print("Couldn't extract the artist name from the title.")
 
     audio['\xa9ART'] = artist_name # '\xa9ART' is the tag for artist information
