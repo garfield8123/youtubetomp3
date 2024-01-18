@@ -21,13 +21,15 @@ def playlist2mp3(playlist_url, Download_location):
             # ℹ️ See help(yt_dlp.postprocessor) for a list of available Postprocessors and their arguments
             'postprocessors': [],
             'outtmpl': download_path + '%(title)s.%(ext)s',
-            'restrictfilenames':True
+            'restrictfilenames': True
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             error_code = ydl.download(URLS)
             info = ydl.extract_info(URLS[0], download=False)
             filename = ydl.prepare_filename(info)
+        #video_title, video_ext = get_video_info(URLS)
+        print(filename)
         addartisttomusic(download_path, filename)
         sleep(10)
 
@@ -41,7 +43,7 @@ def youtubevideo2mp3(youtube_url, Download_location):
         # ℹ️ See help(yt_dlp.postprocessor) for a list of available Postprocessors and their arguments
         'postprocessors': [],
         'outtmpl': download_path + '%(title)s.%(ext)s',
-        'restrictfilenames':True
+        'restrictfilenames': True
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -64,7 +66,7 @@ def youtubeChannel2mp3(Channel_id, Download_location):
             # ℹ️ See help(yt_dlp.postprocessor) for a list of available Postprocessors and their arguments
             'postprocessors': [],
             'outtmpl': download_path + '%(title)s.%(ext)s',
-            'restrictfilenames':True
+            'restrictfilenames': True
         }
         #video_title, video_ext = get_video_info(video['videoId'])
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -81,20 +83,25 @@ def get_video_info(URLS):
 
 def addartisttomusic(download_path, video):
     from mutagen.mp4 import MP4, MP4Cover
-    file_path = download_path + f"{video}"  # Path to the downloaded file
+    import os 
+    file_path = os.path.join(download_path, f"{video}")  # Path to the downloaded file
+    print(file_path)
     audio = MP4(file_path)
     # Splitting the title based on the hyphen to get artist and song title
+    video = video.replace("/", "\\")
+    video = video.split("\\")[-1]
+    video = video[0:len(video)-4]
     title_parts = video.split('-')
-
     if len(title_parts) >= 2:
+        # Grabs the respectful artist_name and song_title 
         artist_name = title_parts[0].strip()
         track_title = title_parts[1].strip()
         print(f"Artist Name: {artist_name}")
         print(f"Track Title: {track_title}")
     else:
-        artist_name = ""
-        track_title = video
-        print("Couldn't extract the artist name from the title.")
+	    artist_name = ""
+	    track_title = video
+	    print("Couldn't extract the artist name from the title.")
 
     audio['\xa9ART'] = artist_name # '\xa9ART' is the tag for artist information
     audio['\xa9nam'] = track_title
