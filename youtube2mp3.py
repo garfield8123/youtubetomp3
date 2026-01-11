@@ -34,10 +34,10 @@ def playlist2mp3(playlist_url, Download_location):
         sleep(10)
 
 def youtubevideo2mp3(youtube_url, Download_location):
+    import os
     download_path = Download_location
     youtube_url = youtube_url.split("=")[1]
     URLS = [youtube_url]
-
     ydl_opts = {
         'format': 'm4a/bestaudio/best',
         # ℹ️ See help(yt_dlp.postprocessor) for a list of available Postprocessors and their arguments
@@ -50,7 +50,8 @@ def youtubevideo2mp3(youtube_url, Download_location):
         error_code = ydl.download(URLS)
         info = ydl.extract_info(URLS[0], download=False)
         filename = ydl.prepare_filename(info)
-    addartisttomusic(download_path, filename)
+    file_path = os.path.join(download_path, f"{filename}")
+    addartisttomusic(info, file_path)
 
 def youtubeChannel2mp3(Channel_id, Download_location):
     videos = scrapetube.get_channel(Channel_id)
@@ -81,30 +82,16 @@ def get_video_info(URLS):
         info = ydl.extract_info(URLS, download=False)
     return info.get('title'), info.get('ext')
 
-def addartisttomusic(download_path, video):
+def addartisttomusic(info, file_path):
     from mutagen.mp4 import MP4, MP4Cover
-    import os 
-    file_path = os.path.join(download_path, f"{video}")  # Path to the downloaded file
-    print(file_path)
     audio = MP4(file_path)
-    # Splitting the title based on the hyphen to get artist and song title
-    video = video.replace("/", "\\")
-    video = video.split("\\")[-1]
-    video = video[0:len(video)-4]
-    title_parts = video.split('-')
-    if len(title_parts) >= 2:
-        # Grabs the respectful artist_name and song_title 
-        artist_name = title_parts[0].strip()
-        track_title = title_parts[1].strip()
-        print(f"Artist Name: {artist_name}")
-        print(f"Track Title: {track_title}")
-    else:
-	    artist_name = ""
-	    track_title = video
-	    print("Couldn't extract the artist name from the title.")
-
-    audio['\xa9ART'] = artist_name # '\xa9ART' is the tag for artist information
-    audio['\xa9nam'] = track_title
+    audio['\xa9ART'] = info.get("channel") # '\xa9ART' is the tag for artist information
+    audio['\xa9nam'] = info.get("title")
+    audio['\xa9alb'] = info.get("album")
+    audio['\xa9wrt'] = info.get("uploader")
+    audio['desc'] = info.get("description")
+    import requests
+    audio['covr'] = [MP4Cover(requests.get(info.get("thumbnail")).content, imageformat=MP4Cover.FORMAT_JPEG)]
     audio.save()
 
 if __name__ == "__main__":
