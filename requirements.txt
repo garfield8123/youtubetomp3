@@ -1,3 +1,4 @@
 scrapetube 
 yt-dlp
 mutagen
+selenium
