@@ -1,7 +1,8 @@
 from time import sleep
-#from scapetube import *
-import scrapetube
-import yt_dlp
+from scapeyoutube import *
+from downloadyoutube import *
+from addinfomusic import *
+#import scrapetube
 import sys
 import os
 
@@ -12,54 +13,27 @@ def printdebug(text,debug=False):
 
 def playlist2mp3(playlist_url, Download_location, debug = True):
     playlist_id = playlist_url.split("=")[1]
-    printdebug(playlist_id,debug)
+    #printdebug(playlist_id,debug)
 
-    videos = scrapetube.get_playlist(playlist_id)
-    printdebug(videos,debug)
+    videos = loadwebsite(playlist_url)
+    #printdebug(videos,debug)
     download_path = Download_location
+    print("list",videos)
     for video in videos:
-        printdebug(video,debug)
-        print("https://www.youtube.com/watch?v=" + video['videoId'])
-        
+        #printdebug(video,debug)
+        #print("https://www.youtube.com/watch?v=" + video['videoId'])
+        print(video)
 
-        URLS = ["https://www.youtube.com/watch?v=" + video['videoId']]
+        #URLS = ["https://www.youtube.com/watch?v=" + video['videoId']]
+        youtubevideo2mp3(video, download_path)
 
-        ydl_opts = {
-            'format': 'm4a/bestaudio/best',
-            # ℹ️ See help(yt_dlp.postprocessor) for a list of available Postprocessors and their arguments
-            'postprocessors': [],
-            'outtmpl': download_path + '%(title)s.%(ext)s',
-            'restrictfilenames': True
-        }
-
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            error_code = ydl.download(URLS)
-            info = ydl.extract_info(URLS[0], download=False)
-            filename = ydl.prepare_filename(info)
-        #video_title, video_ext = get_video_info(URLS)
-        file_path = os.path.join(download_path, f"{filename}")
-        addartisttomusic(info, file_path)
         sleep(10)
 
 def youtubevideo2mp3(youtube_url, Download_location):
     import os
-    download_path = Download_location
-    youtube_url = youtube_url.split("=")[1]
-    URLS = [youtube_url]
-    ydl_opts = {
-        'format': 'm4a/bestaudio/best',
-        # ℹ️ See help(yt_dlp.postprocessor) for a list of available Postprocessors and their arguments
-        'postprocessors': [],
-        'outtmpl': download_path + '%(title)s.%(ext)s',
-        'restrictfilenames': True
-    }
-
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        error_code = ydl.download(URLS)
-        info = ydl.extract_info(URLS[0], download=False)
-        filename = ydl.prepare_filename(info)
-    file_path = os.path.join(download_path, f"{filename}")
-    addartisttomusic(info, file_path)
+    #download_path = Download_location
+    info, file_path = youtubedlp(youtube_url, Download_location)
+    addinfo(file_path,info)
 
 def youtubeChannel2mp3(Channel_id, Download_location):
     videos = scrapetube.get_channel(Channel_id)
@@ -76,7 +50,7 @@ def youtubeChannel2mp3(Channel_id, Download_location):
         #video_title, video_ext = get_video_info(video['videoId'])
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             error_code = ydl.download(URLS)
-            info = ydl.extract_info(URLS[0], download=False)
+            info = ydl.extract_info(URLS, download=False)
             filename = ydl.prepare_filename(info)
         addartisttomusic(download_path, filename)
         sleep(10)
@@ -85,55 +59,6 @@ def get_video_info(URLS):
     with yt_dlp.YoutubeDL() as ydl:
         info = ydl.extract_info(URLS, download=False)
     return info.get('title'), info.get('ext')
-
-def addartisttomusic(info, file_path):
-    from mutagen.mp4 import MP4, MP4Cover
-    from mutagen.mp3 import MP3
-    from mutagen import File
-    import requests 
-    audio = File(file_path)
-    print (type(audio))
-    if isinstance(audio,MP3):
-        from mutagen.id3 import ID3, TIT2, TPE1, TALB, TCOM, COMM, APIC
-        audio = MP3(file_path, ID3=ID3)
-
-        print(info.get("title"))
-        # create tags if they don't exist
-        if audio.tags is None:
-            audio.add_tags()
-
-        audio.tags.add(TPE1(encoding=3, text=info.get("channel", " ")))   # Artist
-        audio.tags.add(TIT2(encoding=3, text=info.get("title", " ")))     # Title
-        audio.tags.add(TALB(encoding=3, text=info.get("album", " ")))     # Album
-        audio.tags.add(TCOM(encoding=3, text=info.get("uploader", " ")))  # Composer / uploader
-
-        audio.tags.add(
-            COMM(
-                encoding=3,
-                lang='eng',
-                desc='description',
-                text=info.get("description", " ")
-            )
-        )
-        audio.tags.add(
-    APIC(
-        encoding=3,
-        mime='image/jpeg',
-        type=3,           # cover(front)
-        desc='Cover',
-        data=requests.get(info.get("thumbnail", " ")).content
-    )
-)
-        print("Mp3")
-    else:
-        audio = MP4(file_path)
-        audio['\xa9ART'] = info.get("channel") # '\xa9ART' is the tag for artist information
-        audio['\xa9nam'] = info.get("title")
-        audio['\xa9alb'] = info.get("album")
-        audio['\xa9wrt'] = info.get("uploader")
-        audio['desc'] = info.get("description")
-        audio['covr'] = [MP4Cover(requests.get(info.get("thumbnail")).content, imageformat=MP4Cover.FORMAT_JPEG)]
-    audio.save()
 
 if __name__ == "__main__":
     if sys.argv[1] == "-h":

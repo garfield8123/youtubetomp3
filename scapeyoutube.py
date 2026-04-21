@@ -54,11 +54,11 @@ def loadwebsite(site):
     driver = webdriver.Chrome(service=service, options=chrome_options)
     driver.get(site)
     page = BeautifulSoup(driver.page_source, features='html.parser')
-    playlistlinks = ["https://www.youtube.com" + x.get("href") for x in page.find_all('a',id='video-title')]
+    playlistlinks = ["https://www.youtube.com" + x.get("href").split("&")[0] for x in page.find_all('a',id='video-title')]
     driver.quit()
     return playlistlinks
 
-videos = loadwebsite("https://www.youtube.com/playlist?list=PLdVHVzaOHtOtMFckSglaegNdHo8ovGo4U")
-print(videos)
+#videos = loadwebsite("https://www.youtube.com/playlist?list=PLdVHVzaOHtOtMFckSglaegNdHo8ovGo4U")
+#print(videos)
 
 
