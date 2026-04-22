@@ -4,7 +4,7 @@ def youtubedlp(youtube_url, download_path):
     #youtube_url = youtube_url.split("=")[1]
     URLS = [youtube_url]
     ydl_opts = {
-        'headers': {
+        'http_headers': {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
     },
         'format': 'm4a/bestaudio/best',

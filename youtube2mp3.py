@@ -27,7 +27,7 @@ def playlist2mp3(playlist_url, Download_location, debug = True):
         #URLS = ["https://www.youtube.com/watch?v=" + video['videoId']]
         youtubevideo2mp3(video, download_path)
 
-        sleep(10)
+        sleep(50)
 
 def youtubevideo2mp3(youtube_url, Download_location):
     import os
