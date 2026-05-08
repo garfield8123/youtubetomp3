@@ -1,5 +1,9 @@
-- name: Build executables or extension modules from Python projects
-  uses: Nuitka/Nuitka-Action@v1.3
+name: Build Executables
+
+on:
+  push:
+  pull_request:
+
 jobs:
   build:
     strategy:
@@ -15,8 +19,8 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10' # Version range or exact version of a Python version to use, using SemVer's version range syntax
-          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+          python-version: '3.10'
+          architecture: 'x64'
           cache: 'pip'
           cache-dependency-path: |
             **/requirements*.txt
